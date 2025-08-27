@@ -1,0 +1,14 @@
+{
+  "lang_label": {
+    "message": "Language"
+  },
+  "source_label": {
+    "message": "Source"
+  },
+  "toggle_on": {
+    "message": "▶ Enable Bilingual"
+  },
+  "toggle_off": {
+    "message": "⏹ Disable Bilingual"
+  }
+}

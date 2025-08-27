@@ -1,0 +1,31 @@
+{
+  "manifest_version": 3,
+  "name": "YT Bilingual",
+  "version": "0.1.0",
+
+  "permissions": ["storage", "activeTab", "tabs", "scripting"],
+  "host_permissions": [
+    "*://*.youtube.com/*",
+    "https://api.openai.com/*"
+  ],
+
+  "background": { "service_worker": "bg.js", "type": "module" },
+  
+  "options_ui": { "page": "options.html", "open_in_tab": true },
+
+  "content_scripts": [
+    {
+      "matches": ["*://*.youtube.com/*"],
+      "js": ["translator.js", "content.js"],
+      "type": "module",
+      "run_at": "document_start"
+    }
+  ],
+
+  "web_accessible_resources": [
+    {
+      "resources": ["inject.js", "overlay.css"],
+      "matches": ["*://*.youtube.com/*"]
+    }
+  ]
+}

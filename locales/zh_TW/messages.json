@@ -1,0 +1,14 @@
+{
+  "lang_label": {
+    "message": "語言"
+  },
+  "source_label": {
+    "message": "來源"
+  },
+  "toggle_on": {
+    "message": "▶ 啟動雙語"
+  },
+  "toggle_off": {
+    "message": "⏹ 停用雙語"
+  }
+}

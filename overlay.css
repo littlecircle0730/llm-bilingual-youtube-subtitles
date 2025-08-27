@@ -1,0 +1,32 @@
+/* overlap on the video */
+.yt-bc-overlay {
+  position: absolute;
+  left: 0; right: 0; bottom: 8%;
+  z-index: 999999;
+  text-align: center;
+  pointer-events: none;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, "Noto Sans TC", sans-serif;
+  text-shadow: 0 0 2px rgba(0,0,0,0.6), 0 0 6px rgba(0,0,0,0.6);
+}
+
+.yt-bc-line {
+  display: block;
+  width: 100%;
+  font-weight: 600;
+  margin: 4px 0;
+}
+
+.yt-bc-original {
+  font-size: 20px;
+  color: #fff;
+}
+
+.yt-bc-translated {
+  font-size: 18px;
+  color: #ffd800;
+}
+
+/* make overlay can adjust with the screen */
+.yt-bc-container {
+  position: relative;
+}
