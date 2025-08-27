@@ -10,5 +10,16 @@
   },
   "toggle_off": {
     "message": "⏹ 停用雙語"
-  }
+  },
+  "api_key_label": { "message": "OpenAI API 金鑰" },
+  "api_key_placeholder": { "message": "sk-..." },
+  "model_label": { "message": "模型" },
+  "model_placeholder": { "message": "gpt-4o" },
+  "save_btn": { "message": "儲存" },
+  "test_btn": { "message": "測試翻譯" },
+  "msg_testing": { "message": "⏳ 測試中…" },
+  "msg_saved": { "message": "✅ 已儲存" },
+  "msg_unknown_error": { "message": "❌ 未知錯誤" },
+  "msg_no_storage": { "message": "⚠ 無法存取 chrome.storage。請從擴充功能的「選項」頁開啟本頁面。" },
+  "error_missing_key": { "message": "未設定 OpenAI API Key（請至擴充功能選單 → 選項）。" }
 }

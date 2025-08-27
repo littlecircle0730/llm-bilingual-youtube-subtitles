@@ -165,6 +165,7 @@ let rafId = null;
 let isRunning = false;
 let targetLang = 'zh-TW';
 let useCustomAPI = true;
+let translationEpoch = 0; // bump this on lang/source changes
 
 // ====== Chunked translation manager ======
 const CHUNK_MS = 45000;   // Each chunk is 45s
@@ -173,9 +174,9 @@ let chunks = [];          // [{id,startMs,endMs,idxStart,idxEnd}]
 const doneChunks = new Set();
 const inflightChunks = new Set();
 
-chrome.storage.local.get(['ytbc_autoStart'], (cfg) => {
-  if (cfg.ytbc_autoStart) { isRunning = true; window.isRunning = true; startRender(); }
-});
+// chrome.storage.local.get(['ytbc_autoStart'], (cfg) => {
+//   if (cfg.ytbc_autoStart) { isRunning = true; window.isRunning = true; startRender(); }
+// });
 
 chrome.storage?.local.get(['ytbc_targetLang', 'ytbc_useCustomAPI'], (cfg) => {
   if (cfg?.ytbc_targetLang) targetLang = cfg.ytbc_targetLang;
@@ -246,6 +247,8 @@ function writeChunkIntoTranslated(chunk, translatedLines){
 // Translate only the chunk where current time belongs (if not already translated or in-flight)
 async function ensureChunkTranslated(nowMs){
   if (!gSegsOrig.length || !chunks.length) return;
+  const localEpoch = translationEpoch;              // ← capture
+
   const c = findChunkByTime(nowMs);
   if (!c) return;
   if (doneChunks.has(c.id) || inflightChunks.has(c.id)) return;
@@ -253,13 +256,12 @@ async function ensureChunkTranslated(nowMs){
   inflightChunks.add(c.id);
   try {
     const subset = gSegsOrig.slice(c.idxStart, c.idxEnd + 1);
-    // Call GPT or YouTube translation logic, but only for subset
     let translatedSubset = [];
+
     if (useCustomAPI) {
       translatedSubset = await window.translateWithAPI(subset, targetLang);
     } else if (lastTimedTextBaseUrl) {
-      // YouTube translation only supports full file; fallback: fetch once then use cache
-      translatedSubset = subset.map(s => ({ ...s })); // Temporary use original text
+      translatedSubset = subset.map(s => ({ ...s })); // placeholder
     } else {
       translatedSubset = subset.map(s => ({ ...s }));
     }
@@ -267,10 +269,10 @@ async function ensureChunkTranslated(nowMs){
       translatedSubset = subset.map(s => ({ ...s }));
     }
 
+    if (localEpoch !== translationEpoch) return;    // ← drop UI write if settings changed
     writeChunkIntoTranslated(c, translatedSubset);
     doneChunks.add(c.id);
 
-    // (Optional) Prefetch next chunk for smoother experience
     const nextIdx = chunks.findIndex(x => x.id === c.id) + 1;
     const next = chunks[nextIdx];
     if (next && !doneChunks.has(next.id) && !inflightChunks.has(next.id)) {
@@ -426,6 +428,7 @@ function buildSourceToggle(){
     useCustomAPI = (e.target.value === 'gpt');
     badge.textContent = useCustomAPI ? 'GPT' : 'YT';
     chrome.storage?.local.set({ ytbc_useCustomAPI: useCustomAPI });
+    handleLangOrSourceChange();             // ← react immediately
     if (isRunning && gSegsOrig.length) await rebuildTranslatedTrack();
   });
 
@@ -451,10 +454,8 @@ function buildLangSelect(){
   sel.addEventListener('change', async (e)=>{
     targetLang = e.target.value || 'en';
     chrome.storage?.local.set({ ytbc_targetLang: targetLang });
-    if (isRunning && (gSegsOrig.length || gSegsTran.length)) await rebuildTranslatedTrack();
-    if (!isRunning) { isRunning = true; window.isRunning = true; startRender(); }
-  });
-
+    handleLangOrSourceChange(); // react immediately, but do NOT auto-start
+  });  
   sel.addEventListener('dblclick', ()=>{
     const v = prompt('Enter BCP-47 language code:', targetLang);
     if (v) {
@@ -462,10 +463,46 @@ function buildLangSelect(){
       sel.value = targetLang;
       useCustomAPI = true;
       chrome.storage?.local.set({ ytbc_targetLang: targetLang });
-      if (isRunning) rebuildTranslatedTrack();
+      // if (isRunning) rebuildTranslatedTrack();
+      chrome.storage?.local.set({ ytbc_targetLang: targetLang, ytbc_useCustomAPI: true });
+      handleLangOrSourceChange();         // react immediately
     }
   });
   return sel;
+}
+function handleLangOrSourceChange() {
+  translationEpoch++;            // Invalidate older in-flight results
+  doneChunks.clear();
+  inflightChunks.clear();
+
+  // Pre-fill with originals to avoid an empty screen
+  if (gSegsOrig.length) {
+    gSegsTran = gSegsOrig.map(s => ({ ...s }));
+    window.gSegsTran = gSegsTran;
+    buildChunks(gSegsOrig);
+  }
+
+  // If not enabled yet, just prepare data and exit (user must click Enable)
+  if (!isRunning) return;
+
+  // Immediately fetch/apply results for the current playback time
+  const v = document.querySelector('video.html5-main-video') || document.querySelector('video');
+  const now = v ? (v.currentTime || 0) * 1000 : 0;
+
+  if (useCustomAPI) {
+    // Current chunk + a bit ahead to feel instant
+    ensureChunkTranslated(now);
+    ensureChunkTranslated(now + 5000);
+  } else if (lastTimedTextBaseUrl) {
+    // YouTube built-in translation: fetch whole track once
+    const tUrl = setParam(lastTimedTextBaseUrl, 'tlang', targetLang);
+    fetchTimedText(tUrl).then(fullYT => {
+      // If language/source changed again, you can guard with an epoch check here if needed
+      if (!Array.isArray(fullYT)) return;
+      gSegsTran = fullYT;
+      window.gSegsTran = gSegsTran;
+    }).catch(e => console.warn('[content] yt full rebuild fail', e));
+  }
 }
 
 // ---------- Caption translation logic ----------
@@ -495,9 +532,8 @@ window.addEventListener('message', async (ev) => {
     // Build chunk index by time (e.g., 45s per chunk; ensure buildChunks is defined)
     buildChunks(gSegsOrig);
 
-    // Start rendering
-    isRunning = true; window.isRunning = true;
-    startRender();
+    // Start rendering // Do NOT auto-start. Only build data; startRender() only if user already enabled.
+    if (isRunning) startRender(); 
 
     // Immediately translate the chunk at current playback head (only calls API when using GPT)
     const v = document.querySelector('video.html5-main-video') || document.querySelector('video');
@@ -527,9 +563,14 @@ window.addEventListener('message', async (ev) => {
 
 async function startRender(){
   setNativeCCHidden(true);
+
   const overlay = ensureOverlay();
   const video = await waitForVideo(8000);
-  if (!overlay || !video) return;
+
+  if (!overlay || !video) {
+    if (isRunning) setTimeout(startRender, 500); // retry while enabled
+    return;
+  }
 
   overlay.style.zIndex = '2147483647';
   if (rafId) cancelAnimationFrame(rafId);
@@ -543,17 +584,12 @@ async function startRender(){
       if (rafId) cancelAnimationFrame(rafId);
       return;
     }
-
     const now = (v.currentTime || 0) * 1000;
-    const prefetchWindow = 5000; // Prefetch content within 5 seconds
+    const prefetchWindow = 5000;
 
-    // Ensure current chunk is translated
     maybeEnsureByVideoTime(now);
-
-    // Also prefetch the chunk ~5s ahead
     maybeEnsureByVideoTime(now + prefetchWindow);
 
-    // Update captions
     o.textContent = activeText(gSegsOrig, now);
     t.textContent = activeText(window.gSegsTran || gSegsTran, now);
 
@@ -562,12 +598,35 @@ async function startRender(){
   renderLoop();
 }
 
+function stopRender(){
+  if (rafId) {
+    cancelAnimationFrame(rafId);
+    rafId = null;
+  }
+  const overlay = document.querySelector('.yt-bc-overlay');
+  if (overlay) {
+    const o = overlay.querySelector('.yt-bc-original');
+    const t = overlay.querySelector('.yt-bc-translated');
+    if (o) o.textContent = '';
+    if (t) t.textContent = '';
+  }
+  setNativeCCHidden(false);
+}
+window.stopRender = stopRender; 
+
 // ---------- Video change observer ----------
 new MutationObserver(() => {
   if (location.href !== pageUrl) {
     pageUrl = location.href;
     gSegsOrig = [];
     gSegsTran = [];
+    gSegsOrig = [];
+
+    chunks = [];
+    doneChunks.clear();
+    inflightChunks.clear();
+    translationEpoch++; 
+
     if (rafId) cancelAnimationFrame(rafId);
     const overlay = document.querySelector('.yt-bc-overlay');
     if (overlay) overlay.remove();

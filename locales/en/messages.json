@@ -10,5 +10,16 @@
   },
   "toggle_off": {
     "message": "⏹ Disable Bilingual"
-  }
+  },
+  "api_key_label": { "message": "OpenAI API Key" },
+  "api_key_placeholder": { "message": "sk-..." },
+  "model_label": { "message": "Model" },
+  "model_placeholder": { "message": "gpt-4o" },
+  "save_btn": { "message": "Save" },
+  "test_btn": { "message": "Test Translation" },
+  "msg_testing": { "message": "⏳ Testing…" },
+  "msg_saved": { "message": "✅ Saved" },
+  "msg_unknown_error": { "message": "❌ Unknown error" },
+  "msg_no_storage": { "message": "⚠ Unable to access chrome.storage. Please open this page from the extension Options menu." },
+  "error_missing_key": { "message": "OpenAI API Key not set (go to extension menu → Options)." }
 }
