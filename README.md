@@ -17,6 +17,7 @@
 
    - Enter your **OpenAI API key** if you want to use ChatGPT/LLM for high-quality translation. 
    - Press **save** to activate it.
+   ![alt text](api_key.png) 
    - ⚠️ Without an API key, the extension falls back to Google’s built-in translation.  
      Sentences may work but could sound less fluent.  
 
