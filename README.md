@@ -14,7 +14,9 @@
 2. **Configure API Key (Options Page)**  
    - Click the extension icon → **Options**. 
    ![alt text](option.png) 
-   - Enter your **OpenAI API key** if you want to use ChatGPT/LLM for high-quality translation.  
+
+   - Enter your **OpenAI API key** if you want to use ChatGPT/LLM for high-quality translation. 
+   - Press **save** to activate it.
    - ⚠️ Without an API key, the extension falls back to Google’s built-in translation.  
      Sentences may work but could sound less fluent.  
 
