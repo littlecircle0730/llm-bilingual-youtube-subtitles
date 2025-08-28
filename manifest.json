@@ -1,30 +1,45 @@
 {
   "manifest_version": 3,
-  "name": "YT Bilingual",
-  "version": "0.1.0",
+  "name": "YT Bilingual + Page Q&A",
+  "version": "0.2.0",
+  "description": "Bilingual subtitles on YouTube and an on-page Q&A sidebar for any site.",
 
   "permissions": ["storage", "activeTab", "tabs", "scripting"],
-  "host_permissions": [
-    "*://*.youtube.com/*",
-    "https://api.openai.com/*"
-  ],
+  "host_permissions": ["https://api.openai.com/*", "*://*/*"],
 
-  "background": { "service_worker": "bg.js", "type": "module" },
-  
-  "options_ui": { "page": "options.html", "open_in_tab": true },
+  "background": { "service_worker": "core/bg.js", "type": "module" },
+
+  "options_ui": { "page": "core/options.html", "open_in_tab": true },
 
   "content_scripts": [
     {
       "matches": ["*://*.youtube.com/*"],
-      "js": ["translator.js", "content.js"],
+      "js": [
+        "features/yt-bilingual/translator.js",
+        "features/yt-bilingual/content.js"
+      ],
+      "css": ["features/yt-bilingual/overlay.css"],
       "type": "module",
       "run_at": "document_start"
+    },
+    {
+      "matches": ["<all_urls>"],
+      "js": [
+        "features/gpt_QA/lib/marked.min.js",
+        "features/gpt_QA/lib/dompurify.min.js",
+        "features/gpt_QA/panel.js"
+      ],
+      "css": ["features/gpt_QA/panel.css"],
+      "run_at": "document_idle"
     }
   ],
-
   "web_accessible_resources": [
     {
-      "resources": ["inject.js", "overlay.css"],
+      "resources": [
+        "features/yt-bilingual/inject.js",
+        "features/yt-bilingual/overlay.css",
+        "features/yt-bilingual/translator.js"
+      ],
       "matches": ["*://*.youtube.com/*"]
     }
   ]

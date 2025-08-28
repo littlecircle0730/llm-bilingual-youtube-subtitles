@@ -5,7 +5,7 @@
 
   const id = 'yt-bc-inject';
   if (!document.getElementById(id)) {
-    const url = chrome.runtime.getURL('inject.js');
+    const url = chrome.runtime.getURL('features/yt-bilingual/inject.js');
     const s = document.createElement('script');
     s.id = id;
     s.src = url;
@@ -18,7 +18,7 @@
     const link = document.createElement('link');
     link.id = 'yt-bc-style';
     link.rel = 'stylesheet';
-    link.href = chrome.runtime.getURL('overlay.css');
+    link.href = chrome.runtime.getURL('features/yt-bilingual/overlay.css');
     document.documentElement.appendChild(link);
   }
 })();
@@ -302,7 +302,7 @@ function fallbackMount() {
 
   const host = document.querySelector('#movie_player, .html5-video-player, ytd-player') || document.body;
   if (!host) {
-    console.warn("[yt-bc] host not ready, retry fallback in 500ms");
+    console.log("[yt-bc] host not ready, retry fallback in 500ms");
     setTimeout(fallbackMount, 500);
     return;
   }

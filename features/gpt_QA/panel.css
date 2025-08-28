@@ -1,0 +1,161 @@
+#gl-panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  height: 100vh;
+  width: 20%;
+  transform: translateX(calc(100% - 44px));
+  transition: transform .25s ease;
+  z-index: 2147483646;
+  font: 13px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  color: #eee;
+  background: #121212;
+  border-left: 1px solid rgba(255,255,255,.08);
+  box-shadow: -6px 0 20px rgba(0,0,0,.6);
+}
+#gl-panel.open { transform: translateX(0); }
+
+#gl-panel:not(.open) {
+  background: transparent;
+  border-left: 0;
+  box-shadow: none;
+  width: 44px;
+  overflow: visible;
+}
+
+#gl-panel .gl-tab {
+  position: absolute;
+  top: 30%;
+  width: 44px;
+  height: 120px;
+  cursor: pointer;
+  background: linear-gradient(180deg, #1e1e1e, #0d0d0d);
+  color: #f5f5f5;
+  font-weight: 600;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  writing-mode: vertical-rl;
+  border-radius: 10px 0 0 10px;
+  user-select: none;
+  box-shadow: -2px 2px 6px rgba(0,0,0,.5);
+  transition: background .2s;
+}
+#gl-panel .gl-tab:hover { background:#222; }
+#gl-panel.open .gl-tab {
+  left: -44px;   /* tab width */
+  right: auto;
+}
+
+body.panel-open {
+  margin-right: 20%;
+  transition: margin-right .25s ease;
+}
+
+#gl-panel .gl-wrap { display:flex; flex-direction: column; height: 100%;}
+#gl-panel:not(.open) .gl-wrap {
+  pointer-events: none;
+  opacity: 0;
+}
+
+#gl-panel header { 
+  padding: 12px 14px; 
+  font-weight: 700; 
+  font-size:14px; 
+  border-bottom: 1px solid rgba(255,255,255,.1); 
+  color:#fafafa;
+}
+#gl-panel .gl-row { padding: 10px 14px; }
+
+#gl-panel textarea, 
+#gl-panel .gl-input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 8px 10px;
+  border: 1px solid rgba(255,255,255,.2);
+  border-radius: 8px;
+  background: #1b1b1b;
+  color: #f0f0f0;
+  font-size:13px;
+  transition: border .2s, background .2s;
+}
+#gl-panel textarea:focus, 
+#gl-panel .gl-input:focus {
+  border-color: #4a90e2;
+  background: #202020;
+  outline: none;
+}
+
+#gl-panel textarea { min-height: 80px; resize: vertical; }
+#gl-panel .gl-ctx {
+  min-height: 120px;
+  max-height: 30vh;
+  overflow: auto;
+  white-space: pre-wrap;
+  background:#181818;
+  border: 1px solid rgba(255,255,255,.15);
+  border-radius: 8px;
+}
+
+#gl-panel .gl-btns { display:flex; gap:8px; }
+#gl-panel .gl-btns button {
+  flex:1;
+  padding: 8px 0;
+  border: none;
+  border-radius: 6px;
+  background: linear-gradient(180deg,#2a2a2a,#1a1a1a);
+  color: #f5f5f5;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background .2s, transform .1s;
+}
+#gl-panel .gl-btns button:hover { background:#333; }
+#gl-panel .gl-btns button:active { transform: scale(.96); }
+
+#gl-panel .gl-answer { 
+  flex:1 1 auto; 
+  overflow:auto; 
+  padding: 12px 14px; 
+  border-top:1px solid rgba(255,255,255,.08);
+  font-size:13px;
+  line-height:1.5;
+  background:#101010;
+}
+#gl-panel .gl-small { font-size:12px; color:#aaa; }
+
+/* Markdown elements styling */
+#gl-panel .gl-answer h1,
+#gl-panel .gl-answer h2,
+#gl-panel .gl-answer h3 { 
+  margin: 12px 0 8px; 
+  line-height: 1.25; 
+  color:#fff; 
+}
+#gl-panel .gl-answer p { margin: 8px 0; color:#ddd; }
+
+#gl-panel .gl-answer ul,
+#gl-panel .gl-answer ol { margin: 8px 0 8px 20px; }
+
+#gl-panel .gl-answer code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  padding: 2px 4px; 
+  border-radius: 4px; 
+  background: #2b2b2b;
+  color:#e8e8e8;
+}
+
+#gl-panel .gl-answer pre {
+  background: #1e1e1e; 
+  padding: 10px; 
+  border-radius: 8px; 
+  overflow: auto;
+  color:#e5e5e5;
+}
+
+#gl-panel .gl-answer blockquote {
+  margin: 8px 0; 
+  padding: 6px 10px; 
+  border-left: 3px solid #444; 
+  background: #181818; 
+  color:#ccc;
+}
